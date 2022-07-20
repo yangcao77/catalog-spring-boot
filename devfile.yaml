@@ -14,13 +14,21 @@ schemaVersion: 2.0.0
 parent:
   id: java-springboot
   registryUrl: "https://registry.devfile.io"
-  components:
-  - container:
-      endpoints:
-      - exposure: public
-        name: catalog
-        targetPort: 9000
-      - name: '8080-tcp'
-        targetPort: 8080
-        exposure: internal
-    name: tools
+components:
+  - name: outerloop-build
+    image:
+      imageName: java-springboot-image:latest
+      dockerfile:
+        uri: docker/Dockerfile
+        buildContext: .
+        rootRequired: false
+  - name: outerloop-deploy
+    attributes:
+      deployment/replicas: 1
+      deployment/cpuLimit: "100m"
+      deployment/cpuRequest: 10m
+      deployment/memoryLimit: 300Mi
+      deployment/memoryRequest: 180Mi
+      deployment/container-port: 9000
+    kubernetes:
+      uri: outerloop-deploy.yaml
